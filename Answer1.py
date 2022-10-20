@@ -213,7 +213,73 @@ def main():
     else:
         print("Solution Not Found")
 
+class MCGraph:
+  def __init__(self):
+    self.vertex_list = []
+    self.open_list = []
+    self.closed_list = []
+    self.maxm = 0
+    self.maxc = 0
+    self.boatcarry = 0
 
+  def astarSearch(self, m, c, bc):
+    siddu_steps = 0
+    self.maxm = m
+    self.maxc = c
+    self.boatcarry = bc
+    self.open_list = PriorityQueue()
+    self.closed_list = set()
+    start = MCNode(m, c, 'L')
+    start.g = 0
+    self.open_list.put((start.h + start.g, start))
+    transfer_node = None
+    while ( not self.open_list.empty()) and (transfer_node is None or transfer_node.missionaries != 0 or transfer_node.cannibals != 0 or transfer_node.boatpos != 'R'):
+      siddu_steps += 1
+      transfer_node = self.open_list.get()
+      self.closed_list.add(transfer_node)
+      adj_nodes = transfer_node.getAdjacentNodes(m, c, self.boatcarry)
+      for adj_node in adj_nodes:
+        inCL = False
+        for closed_node in self.closed_list:
+          if adj_node == closed_node:
+            if (transfer_node.g + 1 < closed_node.g):
+              closed_node.g = transfer_node.g + 1
+              closed_node.predecessor = transfer_node
+              self.parentRedirection(closed_node)
+            inCL = True
+            break
+        if (inCL):
+          continue
+        inOL = False
+        for open_node in self.open_list:
+          if (adj_node == open_node):
+            if (transfer_node.g + 1 < open_node.g):
+              open_node.g = transfer_node.g + 1
+              open_node.predecessor = transfer_node
+            inOL = True
+            break
+        if (inOL):
+          continue
+        adj_node.g = transfer_node.g + 1
+        adj_node.predecessor = transfer_node
+        self.open_list.put((adj_node.h + adj_node.g, adj_node))
+
+    print(siddu_steps)
+    if transfer_node.missionaries == 0 and transfer_node.cannibals == 0 and transfer_node.boatpos == 'R':
+      print("Path:")
+      transfer_node.printPath()
+  def parentRedirection(self, node):
+    adj_nodes = node.getAdjacentNodes(self.maxm, self.maxc, self.boatcarry)
+    for adj_node in adj_nodes:
+      for closed_node in self.closed_list:
+        if adj_node == closed_node:
+          if node.g + 1 < closed_node.g:
+            closed_node.g = node.g + 1
+            closed_node.predecessor = node
+            self.parentRedirection(closed_node)
+          break
+
+    
 
 if __name__ == "__main__":
     main()
