@@ -1,24 +1,21 @@
-
-
-# importing libraries
-import pydot
 import random
 from collections import deque
 
-#parent stores the parent of current node i.e (n_m, n_c, side)
-#list_of nodes stores the state of current node
-# action = (n_m, n_c, side) => no. of missionaries, no. of cannibals. postion of boat (left or right)
+import pydot
 
+#dictonaries for parent and actions
 parent, action, list_of_nodes = dict(), dict(), dict()
 
 
-class Missionaries_Cannibals():
+class Missionaries_and_Cannibals():
 
     def __init__(self):
         
-        self.start = (3, 3, 1)  # Start state is 3 missionaries, 3 cannibals, left side 
-        self.goal = (0, 0, 0)   # Goal state is 0 missionaries, 0 cannibals, right side
-        self.moves = [(1, 0), (0, 1), (1, 1), (0, 2), (2, 0)]  # Moves allowed for transfering to other side
+        # Start state =  3 missionaries, 3 cannibals, left side
+        self.s = (3, 3, 1)   
+        # Goal state = 0 missionaries, 0 cannibals, right side
+        self.goalstate = (0, 0, 0)   
+        self.possiblemoves = [(1, 0), (0, 1), (1, 1), (0, 2), (2, 0)]  
 
         self.boat_position = ["right", "left"] # it represents the position of boat
 
@@ -30,20 +27,20 @@ class Missionaries_Cannibals():
      
     def solve(self, solve_method="dfs"):
         self.visited = dict()
-        parent[self.start] = None
-        action[self.start] = None
-        list_of_nodes[self.start] = None
+        parent[self.s] = None
+        action[self.s] = None
+        list_of_nodes[self.s] = None
 
-        return self.dfs(*self.start, 0) if solve_method == "dfs" else self.bfs()
+        return self.dfs(*self.s, 0) if solve_method == "dfs" else self.bfs()
 
 
     # this function check for goal state
-    def check_goal(self, n_m, n_c, side):
-        return (n_m, n_c, side) == self.goal
+    def isgoal(self, n_m, n_c, side):
+        return (n_m, n_c, side) == self.goalstate
 
     # this function check for goal state
     def check_start(self, n_m, n_c, side):
-        return (n_m, n_c, side) == self.start
+        return (n_m, n_c, side) == self.s
 
     # this function check constraint of no. of cannibals
     def cannibals_outnumbered(self, n_m, n_c):
@@ -55,15 +52,12 @@ class Missionaries_Cannibals():
 
     # check constraint conditions for moving 
     def check_action(self, n_m, n_c):
-        """
-        Constraints check function
-        """
         return (0 <= n_m <= 3) and (0 <= n_c <= 3)
 
 
     def solution(self):
         
-        state = self.goal   # goal state
+        state = self.goalstate   # goal state
         route, steps, nodes = [] ,[], []  # route stores the path followed, steps stores the state
 
         while state is not None:
@@ -82,7 +76,7 @@ class Missionaries_Cannibals():
         print("\nSteps\n")
         for i, ((n_m, n_c, side), node) in enumerate(zip(steps[1:], nodes[1:])):
             
-##            if node.get_label() != str(self.start):
+##            if node.get_label() != str(self.s):
 ##                node.set_style("filled")
 ##                node.set_fillcolor("yellow")
         
@@ -117,11 +111,11 @@ class Missionaries_Cannibals():
         return a, b
 
 
-# Implimentation using BFS approach
+# Implementation using BFS approach
     def bfs(self):
         q = deque()  # Intialising queue
-        q.append(self.start + (0, ))
-        self.visited[self.start] = True
+        q.append(self.s + (0, ))
+        self.visited[self.s] = True
 
         # go from a to b where a is the parent[b] and b = (n_m, n_c, side, depth)
         while q:
@@ -134,7 +128,7 @@ class Missionaries_Cannibals():
 
             can_expand = False
 
-            for x, y in self.moves:
+            for x, y in self.possiblemoves:
                 next_m, next_c, next_s = n_m + op * x, n_c + op * y, int(not side)
                 if (next_m, next_c, next_s) not in self.visited:
                     if self.check_action(next_m, next_c):
@@ -161,7 +155,7 @@ class Missionaries_Cannibals():
         if self.check_start(n_m, n_c, side):
             b.set_style("filled")
             b.set_fillcolor("blue")
-        elif self.check_goal(n_m, n_c, side):
+        elif self.isgoal(n_m, n_c, side):
             b.set_style("filled")
             b.set_fillcolor("green")    
             return True
@@ -178,7 +172,7 @@ class Missionaries_Cannibals():
         
         can_expand = False
 
-        for x, y in self.moves:
+        for x, y in self.possiblemoves:
             next_m, next_c, next_s = n_m + operation * x, n_c + operation * y, int(not side)
 
             if (next_m, next_c, next_s) not in self.visited:
@@ -200,10 +194,10 @@ class Missionaries_Cannibals():
 
 
 def main():
-    mc_problem = Missionaries_Cannibals()  #calling Missionaries_cannibals function containing solution and methods
+    #creating object
+    mc_problem = Missionaries_and_Cannibals()  
 
-
-    # BFS APPROACH
+    # BFS APPROACH solution
     print("Using BFS approach\n")
     if(mc_problem.solve(solve_method="bfs")):
         mc_problem.solution()
